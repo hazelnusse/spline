@@ -12,8 +12,7 @@ env:
   CTEST_OUTPUT_ON_FAILURE: 1
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   CPM_SOURCE_CACHE: ${{ github.workspace }}/cpm_modules
-  CC: clang-13
-  CXX: clang++-13
+  LLVM_VER: 13
 
 jobs:
   build:
@@ -31,13 +30,17 @@ jobs:
         with:
           version: 1.10.2
 
-      - name: Install llvm 13
+      - name: Install llvm ${{ env.LLVM_VER }}
         run: |
-          sudo .github/workflows/llvm.sh 13
+          sudo .github/workflows/llvm.sh ${LLVM_VER}
           pip3 install cmakelang pyyaml
 
       - name: configure
+        env:
+          CC: clang-${{ env.LLVM_VER }}
+          CXX: clang++-${{ env.LLVM_VER }}
         run: cmake -G Ninja -S test -B build -DENABLE_TEST_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug
+
       - name: build
         run: cmake --build build -v
 
@@ -49,8 +52,8 @@ jobs:
 
       - name: configure-format
         run: |
-          clang-format-13 --version
-          cmake -G Ninja -S test -B build-format -DCLANG_FORMAT_PROGRAM=$(which clang-format-13)
+          clang-format-${LLVM_VER} --version
+          cmake -G Ninja -S test -B build-format -DCLANG_FORMAT_PROGRAM=$(which clang-format-${LLVM_VER})
 
       - name: display format diff
         run: |
@@ -62,9 +65,9 @@ jobs:
 
       - name: configure linting
         run: |
-          clang-tidy-13 --version
+          clang-tidy-${LLVM_VER} --version
           cmake -G Ninja -S test -B build-tidy -DUSE_STATIC_ANALYZER=clang-tidy \
-            -DCLANG_TIDY_EXE=$(which clang-tidy-13) -DCLANG_TIDY_ARGS="--enable-check-profile"
+            -DCLANG_TIDY_EXE=$(which clang-tidy-${LLVM_VER}) -DCLANG_TIDY_ARGS="--enable-check-profile"
 
       - name: lint
         run: |
