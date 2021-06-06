@@ -12,6 +12,7 @@ env:
   CTEST_OUTPUT_ON_FAILURE: 1
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   CPM_SOURCE_CACHE: ${{ github.workspace }}/cpm_modules
+  GCC_VER: 11
   LLVM_VER: 13
 
 jobs:
@@ -29,7 +30,17 @@ jobs:
       - uses: seanmiddleditch/gha-setup-ninja@master
         with:
           version: 1.10.2
+
+      - name: Install gcc ${{ env.GCC_VER }}
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-${GCC_VER}
+
       - name: configure
+        env:
+          CC: gcc-${{ env.GCC_VER }}
+          CXX: g++-${{ env.GCC_VER }}
         run: cmake -G Ninja -S test -B build -DENABLE_TEST_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug
 
       - name: build
