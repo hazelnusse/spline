@@ -3,15 +3,17 @@ name: Ubuntu
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 env:
   CTEST_OUTPUT_ON_FAILURE: 1
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   CPM_SOURCE_CACHE: ${{ github.workspace }}/cpm_modules
+  CC: clang-13
+  CXX: clang++-13
 
 jobs:
   build:
@@ -25,16 +27,31 @@ jobs:
           path: "**/cpm_modules"
           key: ${{ github.workflow }}-cpm-modules-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake') }}
 
-      - name: configure
-        run: cmake -Stest -Bbuild -DENABLE_TEST_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug
+      - uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: 1.10.2
 
+      - name: Install format dependencies
+        run: |
+          sudo .github/workflows/llvm.sh 13
+          pip3 install cmakelang pyyaml
+
+      - name: configure
+        run: cmake -G Ninja -S test -B build -DENABLE_TEST_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug
       - name: build
-        run: cmake --build build -j4
+        run: cmake --build build -v
 
       - name: test
-        run: |
-          cd build
-          ctest --build-config Debug
+        run: ctest --test-dir build --output-on-failure
 
       - name: collect code coverage
         run: bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+
+        #      - name: configure-format
+        #        run: |
+        #          clang-format --version
+        #          cmake -G Ninja -S test -B build-format -DCMAKE_FORMAT_PROGRAM=$(which clang-format-13)
+        #
+        #      - name: check style
+        #        run: |
+        #          cmake --build build-format --target check-format -v

@@ -20,6 +20,7 @@ if(ut_ADDED)
   target_include_directories(ut INTERFACE ${ut_SOURCE_DIR}/include/boost)
   target_compile_features(ut INTERFACE cxx_std_20)
   set_target_properties(ut PROPERTIES CXX_EXTENSIONS OFF)
+  target_compile_definitions(ut INTERFACE BOOST_UT_DISABLE_MODULE)
 endif()
 
 macro(enable_test_warnings library visibility)
@@ -35,9 +36,15 @@ macro(enable_test_warnings library visibility)
     -Wextra
     -Wpedantic
     -Wconversion
-    -Werror>>
+    $<IF:$<BOOL:WIN32>,
+    -Wno-c++98-c++11-c++14-c++17-compat-pedantic
+    -Wno-c++98-c++11-compat
+    -Wno-c++98-compat
+    -Wno-c++98-compat-pedantic
+    -Wno-c99-extensions
+    -Wno-pedantic,
+    -Werror>>>
   )
-
 endmacro()
 
 macro(spline_component_test component_source_file)
@@ -54,6 +61,7 @@ macro(spline_component_test component_source_file)
   # the corresponding header file.
   add_library(${component}_component OBJECT ${component_source_file})
   target_link_libraries(${component}_component PRIVATE spline::spline)
+  target_compile_features(${component}_component PRIVATE cxx_std_20)
 
   enable_test_warnings(${test} PRIVATE)
 
