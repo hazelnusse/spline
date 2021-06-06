@@ -15,7 +15,30 @@ env:
   LLVM_VER: 13
 
 jobs:
-  build:
+  build-gcc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: "**/cpm_modules"
+          key: ${{ github.workflow }}-cpm-modules-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake') }}
+
+      - uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: 1.10.2
+      - name: configure
+        run: cmake -G Ninja -S test -B build -DENABLE_TEST_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug
+
+      - name: build
+        run: cmake --build build -v
+
+      - name: test
+        run: ctest --test-dir build --output-on-failure
+
+  build-clang:
     runs-on: ubuntu-latest
 
     steps:
