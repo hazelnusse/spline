@@ -31,7 +31,7 @@ jobs:
         with:
           version: 1.10.2
 
-      - name: Install format dependencies
+      - name: Install llvm 13
         run: |
           sudo .github/workflows/llvm.sh 13
           pip3 install cmakelang pyyaml
@@ -47,11 +47,21 @@ jobs:
       - name: collect code coverage
         run: bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
 
-        #      - name: configure-format
-        #        run: |
-        #          clang-format --version
-        #          cmake -G Ninja -S test -B build-format -DCMAKE_FORMAT_PROGRAM=$(which clang-format-13)
-        #
-        #      - name: check style
-        #        run: |
-        #          cmake --build build-format --target check-format -v
+          #      - name: configure-format
+          #        run: |
+          #          clang-format --version
+          #          cmake -G Ninja -S test -B build-format -DCMAKE_FORMAT_PROGRAM=$(which clang-format-13)
+          #
+          #      - name: check style
+          #        run: |
+          #          cmake --build build-format --target check-format -v
+
+      - name: configure linting
+        run: |
+          clang-tidy-13 --version
+          cmake -G Ninja -S test -B build-tidy -DUSE_STATIC_ANALYZER=clang-tidy \
+            -DCLANG_TIDY_EXE=$(which clang-tidy-13) -DCLANG_TIDY_ARGS="--enable-check-profile"
+
+      - name: lint
+        run: |
+          cmake --build build-tidy -v
