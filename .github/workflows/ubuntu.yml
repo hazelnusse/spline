@@ -47,14 +47,18 @@ jobs:
       - name: collect code coverage
         run: bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
 
-          #      - name: configure-format
-          #        run: |
-          #          clang-format --version
-          #          cmake -G Ninja -S test -B build-format -DCMAKE_FORMAT_PROGRAM=$(which clang-format-13)
-          #
-          #      - name: check style
-          #        run: |
-          #          cmake --build build-format --target check-format -v
+      - name: configure-format
+        run: |
+          clang-format-13 --version
+          cmake -G Ninja -S test -B build-format -DCLANG_FORMAT_PROGRAM=$(which clang-format-13)
+
+      - name: display format diff
+        run: |
+          cmake --build build-format --target format -v
+
+      - name: check style
+        run: |
+          cmake --build build-format --target check-format -v
 
       - name: configure linting
         run: |
