@@ -50,6 +50,26 @@ jobs:
       - name: collect code coverage
         run: bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
 
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: "**/cpm_modules"
+          key: ${{ github.workflow }}-cpm-modules-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake') }}
+
+      - uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: 1.10.2
+
+      - name: Install llvm ${{ env.LLVM_VER }}
+        run: |
+          sudo .github/workflows/llvm.sh ${LLVM_VER}
+          pip3 install cmakelang pyyaml
+
       - name: configure-format
         run: |
           clang-format-${LLVM_VER} --version
@@ -62,6 +82,26 @@ jobs:
       - name: check style
         run: |
           cmake --build build-format --target check-format -v
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: "**/cpm_modules"
+          key: ${{ github.workflow }}-cpm-modules-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake') }}
+
+      - uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: 1.10.2
+
+      - name: Install llvm ${{ env.LLVM_VER }}
+        run: |
+          sudo .github/workflows/llvm.sh ${LLVM_VER}
+          pip3 install cmakelang pyyaml
 
       - name: configure linting
         run: |
