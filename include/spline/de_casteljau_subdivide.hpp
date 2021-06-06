@@ -27,8 +27,9 @@ namespace spline
 template <class InputIt, class OutputIt, class Real, class MultiplicationOp,
           class AdditionOp>
 constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
-                                          OutputIt d_first, Real t,
-                                          MultiplicationOp mul, AdditionOp add) -> OutputIt
+                                      OutputIt d_first, Real t,
+                                      MultiplicationOp mul, AdditionOp add)
+    -> OutputIt
 {
     auto const num_coefficients = last - first;
     if (num_coefficients <= 0)  // Empty or non-sensical input range.
