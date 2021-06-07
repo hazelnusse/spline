@@ -5,6 +5,7 @@
 
 #include <type_traits>
 #include <utility>
+#include "stdx/traits.hpp"
 
 /// @namespace algebra
 /// @brief Types representing and creating vector space algebras
@@ -81,5 +82,17 @@ constexpr auto make_vector_space(Addition&& add, Multiplication&& mul)
 {
     return {std::forward<Addition>(add), std::forward<Multiplication>(mul)};
 }
+
+/// @brief A template alias to determine if a type is a specialization of vector
+/// space algebra
+///@{
+template <class T>
+using is_vector_space_algebra =
+    stdx::is_specialization_of<T, vector_space_algebra>;
+
+template <class T>
+inline constexpr bool is_vector_space_algebra_v =
+    is_vector_space_algebra<T>::value;
+///@}
 
 }  // namespace spline::algebra

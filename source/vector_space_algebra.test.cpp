@@ -26,6 +26,12 @@ auto main() -> int
                decltype(alg2)>);
     };
 
+    test("IsVectorSpaceTrait") = [add, mul]() {
+        auto alg = make_vector_space<double>(add, mul);
+
+        expect(is_vector_space_algebra_v<std::decay_t<decltype(alg)>>);
+    };
+
     test("VectorAddition") = [add, mul]() {
         auto alg = vector_space_algebra{0.0, add, mul};
 
