@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+#include "traits.hpp"
 #include "vector_space_algebra.hpp"
 
 /// @file
@@ -29,7 +31,9 @@ template <class InputIt, class OutputIt, class VectorSpaceAlgebra>
 constexpr auto de_casteljau_subdivide(
     InputIt first, InputIt last, OutputIt d_first,
     typename VectorSpaceAlgebra::scalar_type t, VectorSpaceAlgebra alg)
-    -> OutputIt
+    -> std::enable_if_t<
+        is_vector_space_v<stdx::iter_value_t<InputIt>, VectorSpaceAlgebra>,
+        OutputIt>
 {
     using Scalar = typename VectorSpaceAlgebra::scalar_type;
     auto add = [&alg](auto... args) {
