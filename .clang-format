@@ -1,10 +1,20 @@
 ---
-  AccessModifierOffset: '-2'
-  BasedOnStyle: Google
-  BreakBeforeBraces: Allman
-  BreakConstructorInitializers: AfterColon
-  ColumnLimit: '80'
-  CompactNamespaces: false
-  IncludeBlocks: Preserve
-  IndentWidth: '4'
+AccessModifierOffset: '-2'
+AllowShortFunctionsOnASingleLine: Inline
+BasedOnStyle: Google
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterFunction: true
+    AfterStruct: false
+    SplitEmptyFunction: false
+    SplitEmptyRecord: false
+BreakConstructorInitializers: AfterColon
+ColumnLimit: '80'
+CompactNamespaces: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+IncludeBlocks: Preserve
+IndentWidth: '4'
+SortIncludes: 'true'
+SortUsingDeclarations: 'true'
+Standard: Cpp11
 ...

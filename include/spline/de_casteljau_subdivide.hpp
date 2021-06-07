@@ -5,8 +5,7 @@
 
 /// @namespace spline
 /// @brief The Spline library
-namespace spline
-{
+namespace spline {
 /// @brief De Casteljau's algorithm with subdivision
 /// @tparam InputIt Input iterator.
 /// @tparam OutputIt Output iterator.
@@ -41,18 +40,17 @@ constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
     OutputIt d_last = d_first + 2 * (num_coefficients - 1);
     // SPLINE_TRACE_ON_ENTRY
 
-    auto lerp = [t, add, mul](auto a, auto b)
-    { return add(mul(a, Real(1) - t), mul(b, t)); };
+    auto lerp = [t, add, mul](auto a, auto b) {
+        return add(mul(a, Real(1) - t), mul(b, t));
+    };
 
     // Special case for 1 or 2 coefficients.
-    if (num_coefficients == 1)
-    {
+    if (num_coefficients == 1) {
         *d_first++ = *first;
         // SPLINE_TRACE_N_1
         return d_first;
     }
-    if (num_coefficients == 2)
-    {
+    if (num_coefficients == 2) {
         *d_first++ = *first;
         *d_first++ = lerp(*first, *--last);
         *d_first++ = *last;
@@ -70,8 +68,7 @@ constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
     // portion of output. The first element written is in it's final location,
     // all subsequent elements are intermediate values that will be overwritten
     // during subsequent row iterations.
-    while (first++ != last - 1)
-    {
+    while (first++ != last - 1) {
         *d_first++ = lerp(*(first - 1), *first);
     }
     // After this loop exits, d_first points to one past the second to last
@@ -86,8 +83,7 @@ constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
     // to be placed.
 
     // SPLINE_TRACE_ROW_0
-    for (int r = 2; r < num_coefficients - 1; ++r)
-    {
+    for (int r = 2; r < num_coefficients - 1; ++r) {
         *d_last = lerp(*--d_first, *(d_last + 1));
         --d_last;
         // On row index r >= 1, mean we are reading from row r to produce row r
@@ -100,8 +96,7 @@ constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
         // that the two inputs to lerp are not adjacent in the output array,
         // but the return value is placed one element to the left of the right
         // hand input element.
-        for (int j = 0; j < num_coefficients - r - 1; ++j)
-        {
+        for (int j = 0; j < num_coefficients - r - 1; ++j) {
             *d_first = lerp(*(d_first - 1), *d_first);
             --d_first;
         }

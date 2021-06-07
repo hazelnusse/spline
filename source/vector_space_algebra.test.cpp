@@ -15,8 +15,7 @@ auto main() -> int
     auto add = [](auto point1, auto point2) { return point1 + point2; };
     auto mul = [](auto real, auto point) { return real * point; };
 
-    test("Constructible") = [add, mul]()
-    {
+    test("Constructible") = [add, mul]() {
         auto alg1 = make_vector_space<double>(add, mul);
         auto alg2 = vector_space_algebra{0.0, add, mul};
 
@@ -27,8 +26,7 @@ auto main() -> int
                decltype(alg2)>);
     };
 
-    test("VectorAddition") = [add, mul]()
-    {
+    test("VectorAddition") = [add, mul]() {
         auto alg = vector_space_algebra{0.0, add, mul};
 
         auto v = std::complex{1.0, 2.0};
@@ -37,8 +35,7 @@ auto main() -> int
         expect((v + u) == alg.add(v, u));
     };
 
-    test("ScalarMultiplication") = [add, mul]()
-    {
+    test("ScalarMultiplication") = [add, mul]() {
         auto alg = vector_space_algebra{0.0, add, mul};
 
         auto v = std::complex{1.0, 2.0};
@@ -47,8 +44,7 @@ auto main() -> int
         expect((a * v) == alg.mul(a, v));
     };
 
-    test("Copyable") = [add, mul]()
-    {
+    test("Copyable") = [add, mul]() {
         auto alg1 = vector_space_algebra{0.0, add, mul};
         auto alg2 = alg1;
 
@@ -58,15 +54,13 @@ auto main() -> int
         expect(alg1.add(v, u) == alg2.add(v, u));
     };
 
-    test("Empty") = [add, mul]()
-    {
+    test("Empty") = [add, mul]() {
         auto alg = vector_space_algebra{0.0, add, mul};
 
         expect(std::is_empty_v<decltype(alg)>);
     };
 
-    test("WithMultipleVectorTypes") = []<class V>()
-    {
+    test("WithMultipleVectorTypes") = []<class V>() {
         auto tuple_add = [](auto v, auto u) -> decltype(v) {
             return {std::get<0>(v) + std::get<0>(u),
                     std::get<1>(v) + std::get<1>(u)};

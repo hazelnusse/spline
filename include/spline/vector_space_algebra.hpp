@@ -8,8 +8,7 @@
 
 /// @namespace algebra
 /// @brief Types representing and creating vector space algebras
-namespace spline::algebra
-{
+namespace spline::algebra {
 /// @brief A generic vector space defining addition and scalar multiplication
 /// @tparam Scalar Vector space scalar type
 /// @tparam Addition Function object type defining vector addition
@@ -17,8 +16,7 @@ namespace spline::algebra
 /// @note The vector type is not specified, allowing a `vector_space_algebra` to
 /// be used with multiple vector types.
 template <class Scalar, class Addition, class Multiplication>
-class vector_space_algebra : Addition, Multiplication
-{
+class vector_space_algebra : Addition, Multiplication {
   public:
     static_assert(std::is_empty_v<Addition>,
                   "Additional must be a stateless function object.");
@@ -37,8 +35,7 @@ class vector_space_algebra : Addition, Multiplication
                   std::is_same_v<std::decay_t<M>, Multiplication>>>
     constexpr vector_space_algebra(A&& add, M&& mul) :
         Addition{std::forward<A>(add)}, Multiplication{std::forward<M>(mul)}
-    {
-    }
+    {}
 
     /// @brief Constructs a vector space from addition and multiplication
     /// operations, accepting the scalar type to allow
@@ -51,8 +48,7 @@ class vector_space_algebra : Addition, Multiplication
                   std::is_same_v<std::decay_t<M>, Multiplication>>>
     constexpr vector_space_algebra(Scalar, A&& add, M&& mul) :
         vector_space_algebra{std::forward<A>(add), std::forward<M>(mul)}
-    {
-    }
+    {}
 
     /// @brief Performs vector addition
     template <class... Args>
