@@ -1,5 +1,7 @@
 #pragma once
 
+#include "vector_space_algebra.hpp"
+
 /// @file
 /// @brief De Casteljau's algorithm with subdivision
 
@@ -23,13 +25,20 @@ namespace spline {
 /// @return Output iterator to the element past the last element written.
 /// @pre @p d_first must point to a destination range where it is possible to
 ///      write  2 * std::distance(first, last) - 1 elements.
-template <class InputIt, class OutputIt, class Real, class MultiplicationOp,
-          class AdditionOp>
-constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
-                                      OutputIt d_first, Real t,
-                                      MultiplicationOp mul, AdditionOp add)
+template <class InputIt, class OutputIt, class VectorSpaceAlgebra>
+constexpr auto de_casteljau_subdivide(
+    InputIt first, InputIt last, OutputIt d_first,
+    typename VectorSpaceAlgebra::scalar_type t, VectorSpaceAlgebra alg)
     -> OutputIt
 {
+    using Scalar = typename VectorSpaceAlgebra::scalar_type;
+    auto add = [&alg](auto... args) {
+        return alg.add(std::forward<decltype(args)>(args)...);
+    };
+    auto mul = [&alg](auto... args) {
+        return alg.mul(std::forward<decltype(args)>(args)...);
+    };
+
     auto const num_coefficients = last - first;
     if (num_coefficients <= 0)  // Empty or non-sensical input range.
     {
@@ -41,7 +50,7 @@ constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
     // SPLINE_TRACE_ON_ENTRY
 
     auto lerp = [t, add, mul](auto a, auto b) {
-        return add(mul(a, Real(1) - t), mul(b, t));
+        return add(mul(a, Scalar(1) - t), mul(b, t));
     };
 
     // Special case for 1 or 2 coefficients.
