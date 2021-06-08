@@ -1,6 +1,8 @@
 #pragma once
 
 #include <type_traits>
+#include "impl/algebraic_vector.hpp"
+#include "impl/proxy_iterator.hpp"
 #include "traits.hpp"
 #include "vector_space_algebra.hpp"
 
@@ -13,39 +15,12 @@ namespace spline {
 
 namespace detail {
 struct de_casteljau_subdivide_fn final {
-    /// @brief De Casteljau's algorithm with subdivision
-    /// @tparam InputIt Input iterator.
-    /// @tparam OutputIt Output iterator.
-    /// @tparam Real Real number type (typically float/double/long double).
-    /// @tparam MultiplicationOp binary operator accepting
-    ///         InputIt::value_type and Real, returning an InputIt::value_type.
-    /// @tparam AdditionOp binary operator accepting two InputIt::value_type
-    ///         and returning a InputIt::value_type.
-    /// @param[in] first Iterator to first element of input range.
-    /// @param[in] last Iterator to one past the last element of the range.
-    /// @param[in] t Point at which to compute the polynomial value.
-    /// @param[in] mul Vector-Scalar multiplication function object.
-    /// @param[in] add Vector-Vector addition function object.
-    /// @param[out] d_first Beginning of destination range.
-    /// @return Output iterator to the element past the last element written.
-    /// @pre @p d_first must point to a destination range where it is possible
-    /// to
-    ///      write  2 * std::distance(first, last) - 1 elements.
-    template <class InputIt, class OutputIt, class VectorSpaceAlgebra>
+    template <class InputIt, class OutputIt,
+              class Scalar = typename InputIt::value_type::scalar_type>
     constexpr auto operator()(InputIt first, InputIt last, OutputIt d_first,
-                              typename VectorSpaceAlgebra::scalar_type t,
-                              VectorSpaceAlgebra alg) const
-        -> std::enable_if_t<
-            is_vector_space_v<stdx::iter_value_t<InputIt>, VectorSpaceAlgebra>,
-            OutputIt>
+                              Scalar t) const -> OutputIt
     {
-        using Scalar = typename VectorSpaceAlgebra::scalar_type;
-        auto add = [&alg](auto... args) {
-            return alg.add(std::forward<decltype(args)>(args)...);
-        };
-        auto mul = [&alg](auto... args) {
-            return alg.mul(std::forward<decltype(args)>(args)...);
-        };
+        using Vector = typename std::iterator_traits<InputIt>::value_type;
 
         auto const num_coefficients = last - first;
         if (num_coefficients <= 0)  // Empty or non-sensical input range.
@@ -57,8 +32,8 @@ struct de_casteljau_subdivide_fn final {
         OutputIt d_last = d_first + 2 * (num_coefficients - 1);
         // SPLINE_TRACE_ON_ENTRY
 
-        auto lerp = [t, add, mul](auto a, auto b) {
-            return add(mul(a, Scalar(1) - t), mul(b, t));
+        auto lerp = [t](Vector a, Vector b) {
+            return ((Scalar(1) - t) * a) + (t * b);
         };
 
         // Special case for 1 or 2 coefficients.
@@ -127,6 +102,39 @@ struct de_casteljau_subdivide_fn final {
 
         // SPLINE_TRACE_ON_EXIT
         return d_last + num_coefficients;
+    }
+
+    /// @brief De Casteljau's algorithm with subdivision
+    /// @tparam InputIt Input iterator.
+    /// @tparam OutputIt Output iterator.
+    /// @tparam Real Real number type (typically float/double/long double).
+    /// @tparam MultiplicationOp binary operator accepting
+    ///         InputIt::value_type and Real, returning an InputIt::value_type.
+    /// @tparam AdditionOp binary operator accepting two InputIt::value_type
+    ///         and returning a InputIt::value_type.
+    /// @param[in] first Iterator to first element of input range.
+    /// @param[in] last Iterator to one past the last element of the range.
+    /// @param[in] t Point at which to compute the polynomial value.
+    /// @param[in] mul Vector-Scalar multiplication function object.
+    /// @param[in] add Vector-Vector addition function object.
+    /// @param[out] d_first Beginning of destination range.
+    /// @return Output iterator to the element past the last element written.
+    /// @pre @p d_first must point to a destination range where it is possible
+    /// to
+    ///      write  2 * std::distance(first, last) - 1 elements.
+    template <class InputIt, class OutputIt, class VectorSpaceAlgebra,
+              class Scalar = typename VectorSpaceAlgebra::scalar_type>
+    constexpr auto operator()(InputIt first, InputIt last, OutputIt d_first,
+                              /* type identity */ Scalar t, VectorSpaceAlgebra alg) const
+        -> std::enable_if_t<
+            is_vector_space_v<stdx::iter_value_t<InputIt>, VectorSpaceAlgebra>,
+            OutputIt>
+    {
+        using algebra::impl::proxy_iterator;
+
+        return (*this)(proxy_iterator{first, alg}, proxy_iterator{last, alg},
+                       proxy_iterator{d_first, alg}, t)
+            .iter;
     }
 };
 
