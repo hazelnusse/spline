@@ -126,4 +126,8 @@ Checks: >-
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*/spline/include'
 UseColor: true
+
+CheckOptions:
+  - key:             misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value:           'true'
 ...

@@ -14,6 +14,7 @@ endif()
 
 set(component_files
     "${CMAKE_CURRENT_LIST_DIR}/../source/de_casteljau_subdivide.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/../source/impl/algebraic_vector.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../source/traits.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../source/vector_space_algebra.cpp"
 )
