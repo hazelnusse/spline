@@ -29,6 +29,24 @@ auto main() -> int
         expect(it2 == result.cend());
     };
 
+    test("Deleted") = []() {
+        using Scalar = double;
+        using Vector = std::array<Scalar, 2>;
+        using Container = std::array<Vector, 3>;
+
+        auto add = [](auto v, auto u) -> decltype(v + u) { return v + u; };
+        auto mul = [](auto a, auto v) -> decltype(a * v) { return a * v; };
+
+        using Algebra =
+            algebra::vector_space_algebra<Scalar, std::decay_t<decltype(add)>,
+                                          std::decay_t<decltype(mul)>>;
+
+        expect(!std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Container::iterator,
+               typename Container::iterator, typename Container::iterator,
+               Scalar, Algebra>);
+    };
+
     test("Degree0") = [alg]() {
         {
             std::array<double, 1> c{42.0};
