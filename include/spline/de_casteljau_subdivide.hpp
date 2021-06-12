@@ -3,6 +3,7 @@
 /// @file
 /// @brief De Casteljau's algorithm with subdivision
 
+#include <functional>
 #include <type_traits>
 #include <utility>
 #include "spline/concepts.hpp"
@@ -14,15 +15,16 @@
 namespace spline {
 
 namespace detail {
+
 struct de_casteljau_subdivide_fn final {
     /// @brief De Casteljau's algorithm with subdivision
     /// @tparam InputIt Input iterator.
     /// @tparam OutputIt Output iterator.
     /// @tparam Scalar Scalar number type (typically float/double/long double).
-    /// @tparam MultiplicationOp binary operator accepting
+    /// @tparam Mul binary operator accepting
     ///         InputIt::value_type and Scalar, returning an
     ///         InputIt::value_type.
-    /// @tparam AdditionOp binary operator accepting two InputIt::value_type
+    /// @tparam Add binary operator accepting two InputIt::value_type
     ///         and returning a InputIt::value_type.
     /// @param[in] first Iterator to first element of input range.
     /// @param[in] last Iterator to one past the last element of the range.
@@ -34,14 +36,13 @@ struct de_casteljau_subdivide_fn final {
     /// @pre @p d_first must point to a destination range where it is possible
     /// to write  2 * std::distance(first, last) - 1 elements.
     template <class InputIt, class OutputIt, class Scalar,
-              class MultiplicationOp, class AdditionOp>
+              class Mul = multiplies<Scalar, xtd::iter_value_t<InputIt>>,
+              class Add = std::plus<>>
     constexpr auto operator()(InputIt first, InputIt last, OutputIt d_first,
-                              Scalar t, MultiplicationOp mul,
-                              AdditionOp add) const
-        -> std::enable_if_t<
-            concepts::is_vector_space_v<xtd::iter_value_t<InputIt>, Scalar,
-                                        AdditionOp, MultiplicationOp>,
-            OutputIt>
+                              Scalar t, Mul mul = {}, Add add = {}) const
+        -> std::enable_if_t<concepts::is_vector_space_v<
+                                xtd::iter_value_t<InputIt>, Scalar, Add, Mul>,
+                            OutputIt>
     {
         return core::de_casteljau_subdivide(std::move(first), std::move(last),
                                             std::move(d_first), std::move(t),

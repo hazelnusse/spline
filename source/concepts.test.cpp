@@ -9,7 +9,7 @@
 namespace {
 
 template <class V, class S = typename V::value_type, class Add = std::plus<>,
-          class Mul = std::multiplies<>>
+          class Mul = spline::multiplies<S, V>>
 struct vs {
     using vector_type = V;
     using scalar_type = S;
@@ -27,15 +27,15 @@ auto main() -> int
     using boost::ut::test;
     using namespace spline::concepts;
 
-    auto add = [](auto v, auto u) -> decltype(v) {
+    auto add = [](auto v, auto u) -> decltype(decltype(v){
+                                      std::get<0>(v) + std::get<0>(u),
+                                      std::get<1>(v) + std::get<1>(u)}) {
         return {std::get<0>(v) + std::get<0>(u),
                 std::get<1>(v) + std::get<1>(u)};
     };
-    auto mul = [](auto a, auto v) -> decltype(v) {
-        return {
-            a * std::get<0>(v),
-            a * std::get<1>(v),
-        };
+    auto mul = [](auto a, auto v) -> decltype(decltype(v){a * std::get<0>(v),
+                                                          a * std::get<1>(v)}) {
+        return {a * std::get<0>(v), a * std::get<1>(v)};
     };
 
     (void)add;
