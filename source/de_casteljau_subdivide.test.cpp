@@ -1,4 +1,6 @@
 #include <array>
+#include <functional>
+#include <spline/concepts.hpp>
 #include <spline/de_casteljau_subdivide.hpp>
 #include <ut.hpp>
 
@@ -14,6 +16,52 @@ auto main() -> int
     auto mul = [](auto point, auto real) { return point * real; };
 
     auto add = [](auto point1, auto point2) { return point1 + point2; };
+
+    test("VectorSpaceConstrained") = []() {
+        using Scalar = double;
+        using Vector = std::array<double, 2>;
+        using Container = std::array<Vector, 3>;
+
+        // Use SFINAE friendly lambdas
+        const auto bad_mul = [](auto a, auto v) -> decltype(a * v) {
+            return a * v;
+        };
+        const auto bad_add = [](auto v, auto u) -> decltype(v + u) {
+            return v + u;
+        };
+        const auto ok_mul = [](auto a, auto v) -> decltype(v) {
+            return {a * std::get<0>(v), a * std::get<1>(v)};
+        };
+        const auto ok_add = [](auto v, auto u) -> decltype(v) {
+            return {std::get<0>(v) + std::get<0>(u),
+                    std::get<1>(v) + std::get<1>(u)};
+        };
+
+        expect(not std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Container::iterator,
+               typename Container::iterator, typename Container::iterator,
+               Scalar, std::multiplies<>, std::plus<>>);
+
+        expect(not std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Container::iterator,
+               typename Container::iterator, typename Container::iterator,
+               Scalar, decltype(bad_mul), decltype(bad_add)>);
+
+        expect(not std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Container::iterator,
+               typename Container::iterator, typename Container::iterator,
+               Vector, decltype(ok_mul), decltype(ok_add)>);
+
+        expect(std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Container::iterator,
+               typename Container::iterator, typename Container::iterator,
+               Scalar, decltype(ok_mul), decltype(ok_add)>);
+
+        expect(std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Vector::iterator,
+               typename Vector::iterator, typename Vector::iterator, double,
+               std::multiplies<>, std::plus<>>);
+    };
 
     test("EmptyOrReversed") = [mul, add]() {
         std::array<double, 0> c{};
