@@ -3,15 +3,19 @@
 /// @file
 /// @brief De Casteljau's algorithm with subdivision
 
+#include <type_traits>
+#include "spline/concepts.hpp"
+#include "spline/traits.hpp"
+
 /// @namespace spline
 /// @brief The Spline library
 namespace spline {
 /// @brief De Casteljau's algorithm with subdivision
 /// @tparam InputIt Input iterator.
 /// @tparam OutputIt Output iterator.
-/// @tparam Real Real number type (typically float/double/long double).
+/// @tparam Scalar Scalar number type (typically float/double/long double).
 /// @tparam MultiplicationOp binary operator accepting
-///         InputIt::value_type and Real, returning an InputIt::value_type.
+///         InputIt::value_type and Scalar, returning an InputIt::value_type.
 /// @tparam AdditionOp binary operator accepting two InputIt::value_type
 ///         and returning a InputIt::value_type.
 /// @param[in] first Iterator to first element of input range.
@@ -23,12 +27,15 @@ namespace spline {
 /// @return Output iterator to the element past the last element written.
 /// @pre @p d_first must point to a destination range where it is possible to
 ///      write  2 * std::distance(first, last) - 1 elements.
-template <class InputIt, class OutputIt, class Real, class MultiplicationOp,
+template <class InputIt, class OutputIt, class Scalar, class MultiplicationOp,
           class AdditionOp>
 constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
-                                      OutputIt d_first, Real t,
+                                      OutputIt d_first, Scalar t,
                                       MultiplicationOp mul, AdditionOp add)
-    -> OutputIt
+    -> std::enable_if_t<
+        concepts::is_vector_space_v<xtd::iter_value_t<InputIt>, Scalar,
+                                    AdditionOp, MultiplicationOp>,
+        OutputIt>
 {
     auto const num_coefficients = last - first;
     if (num_coefficients <= 0)  // Empty or non-sensical input range.
@@ -41,7 +48,7 @@ constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
     // SPLINE_TRACE_ON_ENTRY
 
     auto lerp = [t, add, mul](auto a, auto b) {
-        return add(mul(a, Real(1) - t), mul(b, t));
+        return add(mul(a, Scalar(1) - t), mul(b, t));
     };
 
     // Special case for 1 or 2 coefficients.
