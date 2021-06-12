@@ -1,8 +1,11 @@
 #pragma once
-//
+
 /// @file
 /// @brief De Casteljau's algorithm with subdivision, without constraint
 /// checking
+
+#include <iterator>
+#include <numeric>
 
 /// @namespace spline::core
 /// @brief The Spline library algorithms
@@ -33,86 +36,37 @@ constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
                                       MultiplicationOp mul, AdditionOp add)
     -> OutputIt
 {
-    auto const num_coefficients = last - first;
-    if (num_coefficients <= 0)  // Empty or non-sensical input range.
-    {
-        return d_first;
+    // initialize left half of destination range with b0^(0) .. bn^(0), then
+    // [b0^(0), b1^(0), ..., bn^(0), X, ..., X, X]
+    auto d_last = std::copy(first, last, d_first);
+    if (d_last == d_first) {
+        return d_last;
     }
 
-    // Set up pointer to last element of output array (not one past last).
-    OutputIt d_last = d_first + 2 * (num_coefficients - 1);
-    // SPLINE_TRACE_ON_ENTRY
+    // point to mid and last element in destination range
+    const auto n = std::distance(d_first, d_last) - 1;
+    const auto d_mid = std::prev(d_last);
+    std::advance(d_last, n - 1);
 
-    auto lerp = [t, add, mul](auto a, auto b) {
-        return add(mul(a, Scalar(1) - t), mul(b, t));
-    };
+    // copy the bn^(0) to the last element in the dest
+    // [b0^(0), b1^(0), ..., bn^(0), X, ..., X, bn^(0)]
+    *d_last = *d_mid;
 
-    // Special case for 1 or 2 coefficients.
-    if (num_coefficients == 1) {
-        *d_first++ = *first;
-        // SPLINE_TRACE_N_1
-        return d_first;
-    }
-    if (num_coefficients == 2) {
-        *d_first++ = *first;
-        *d_first++ = lerp(*first, *--last);
-        *d_first++ = *last;
-        // SPLINE_TRACE_N_2
-        return d_first;
-    }
+    // evaluate reduced order polynomials with recurrence relation
+    for (; d_first != d_last; ++d_first) {
+        // in first iteration:
+        // [b0^(0), b0^(1), ..., bn-1^(1), X, ..., X, bn^(0)]
+        std::adjacent_difference(
+            d_first, std::next(d_mid), d_first, [t, mul, add](auto b, auto a) {
+                return add(mul((Scalar{1} - t), a), mul(t, b));
+            });
 
-    // Copy c_0^0 from input to first element of output.
-    *d_first++ = *first;
-
-    // Copy c_n^0 from input to last element of output.
-    *d_last-- = *--last;
-
-    // Lerp c_i^0 with c_{i+1}^0 for i \in [0, n-2], place results in left
-    // portion of output. The first element written is in it's final
-    // location, all subsequent elements are intermediate values that will
-    // be overwritten during subsequent row iterations.
-    while (first++ != last - 1) {
-        *d_first++ = lerp(*(first - 1), *first);
-    }
-    // After this loop exits, d_first points to one past the second to last
-    // element of row one, i.e., one past c_{n - 1}^1. This is the middle of
-    // the output array.
-
-    // Lerp c_{n-1}^0 with c_n^0, place result in output. After this step,
-    // we never look at input range again since we have placed all results
-    // (both final and temporary) in the output range.
-    *d_last-- = lerp(*(last - 1), *last);
-    // After this line, d_last points to index 2*n - 2, i.e., where c_n^2
-    // needs to be placed.
-
-    // SPLINE_TRACE_ROW_0
-    for (int r = 2; r < num_coefficients - 1; ++r) {
-        *d_last = lerp(*--d_first, *(d_last + 1));
-        --d_last;
-        // On row index r >= 1, mean we are reading from row r to produce
-        // row r
-        // + 1
-        // Step 1: lerp second to last element of row r with last element of
-        // row r, place result in appropriate location on right segment of
-        // output.  I think this is:
-        // c_{n - r}^{r + 1} = lerp(c_{n - r}^r, c_{n - r + 1}^r), noting
-        //      i = 4                  i = 2          i = 5
-        // that the two inputs to lerp are not adjacent in the output array,
-        // but the return value is placed one element to the left of the
-        // right hand input element.
-        for (int j = 0; j < num_coefficients - r - 1; ++j) {
-            *d_first = lerp(*(d_first - 1), *d_first);
-            --d_first;
-        }
-        // d_first points to c_{r-2}^{r-2}
-        d_first += num_coefficients - r;
-        // SPLINE_TRACE_ROW_N
+        // in first iteration:
+        // [b0^(0), b0^(1), ..., bn-1^(1), X, ..., bn-1^(1), bn^(0)]
+        *--d_last = *d_mid;
     }
 
-    *d_last = lerp(*(d_last - 1), *(d_last + 1));
-
-    // SPLINE_TRACE_ON_EXIT
-    return d_last + num_coefficients;
+    return std::next(d_mid, n + 1);
 }
 
 }  // namespace spline::core
