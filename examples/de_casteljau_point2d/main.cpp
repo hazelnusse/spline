@@ -8,14 +8,12 @@
 #include <spline/de_casteljau_subdivide.hpp>
 #include <vector>
 
-namespace
-{
+namespace {
 template <class Real>
 constexpr auto nan = std::numeric_limits<Real>::quiet_NaN();
 
 template <typename Real>
-struct Point2d
-{
+struct Point2d {
     Real data[2];
 
     constexpr Point2d<Real> operator+(Point2d<Real> const& other)
@@ -47,8 +45,7 @@ void example1(std::size_t N)
     std::uniform_real_distribution<> dis(-1.0, 1.0);
 
     double const dt = 2.0 / double(N - 1);
-    for (std::size_t i = 0; i < N; ++i)
-    {
+    for (std::size_t i = 0; i < N; ++i) {
         // Point const random_point{dis(gen), dis(gen)};
         Point const random_point{-1.0 + dt * double(i), dis(gen)};
         input.push_back(random_point);
@@ -67,20 +64,16 @@ void example1(std::size_t N)
 
 int main(int argc, char** argv)
 {
-    if (argc != 2)
-    {
+    if (argc != 2) {
         return 1;
     }
 
     std::size_t N = 0;
     if (auto [p, ec] =
             std::from_chars(argv[1], argv[1] + std::strlen(argv[1]), N);
-        ec == std::errc())
-    {
+        ec == std::errc()) {
         example1(N);
-    }
-    else
-    {
+    } else {
         return 1;
     }
 
