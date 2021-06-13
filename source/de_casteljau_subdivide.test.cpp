@@ -1,4 +1,6 @@
 #include <array>
+#include <functional>
+#include <spline/concepts.hpp>
 #include <spline/de_casteljau_subdivide.hpp>
 #include <ut.hpp>
 
@@ -15,8 +17,53 @@ auto main() -> int
 
     auto add = [](auto point1, auto point2) { return point1 + point2; };
 
-    test("EmptyOrReversed") = [mul, add]()
-    {
+    test("VectorSpaceConstrained") = []() {
+        using Scalar = double;
+        using Vector = std::array<double, 2>;
+        using Container = std::array<Vector, 3>;
+
+        // Use SFINAE friendly lambdas
+        const auto bad_mul = [](auto a, auto v) -> decltype(a * v) {
+            return a * v;
+        };
+        const auto bad_add = [](auto v, auto u) -> decltype(v + u) {
+            return v + u;
+        };
+        const auto ok_mul = [](auto a, auto v) -> decltype(v) {
+            return {a * std::get<0>(v), a * std::get<1>(v)};
+        };
+        const auto ok_add = [](auto v, auto u) -> decltype(v) {
+            return {std::get<0>(v) + std::get<0>(u),
+                    std::get<1>(v) + std::get<1>(u)};
+        };
+
+        expect(not std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Container::iterator,
+               typename Container::iterator, typename Container::iterator,
+               Scalar, std::multiplies<>, std::plus<>>);
+
+        expect(not std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Container::iterator,
+               typename Container::iterator, typename Container::iterator,
+               Scalar, decltype(bad_mul), decltype(bad_add)>);
+
+        expect(not std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Container::iterator,
+               typename Container::iterator, typename Container::iterator,
+               Vector, decltype(ok_mul), decltype(ok_add)>);
+
+        expect(std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Container::iterator,
+               typename Container::iterator, typename Container::iterator,
+               Scalar, decltype(ok_mul), decltype(ok_add)>);
+
+        expect(std::is_invocable_v<
+               decltype(de_casteljau_subdivide), typename Vector::iterator,
+               typename Vector::iterator, typename Vector::iterator, double,
+               std::multiplies<>, std::plus<>>);
+    };
+
+    test("EmptyOrReversed") = [mul, add]() {
         std::array<double, 0> c{};
         std::array<double, 0> result{};
         auto it1 = de_casteljau_subdivide(c.cbegin(), c.cend(), result.begin(),
@@ -29,8 +76,7 @@ auto main() -> int
         expect(it2 == result.cend());
     };
 
-    test("Degree0") = [mul, add]()
-    {
+    test("Degree0") = [mul, add]() {
         {
             std::array<double, 1> c{42.0};
             std::array<double, 1> result{};
@@ -42,12 +88,11 @@ auto main() -> int
         }
     };
 
-    test("Degree1") = [mul, add]()
-    {
-        auto degree1poly = [](auto c, auto t)
-        { return c[0] * (1 - t) + c[1] * t; };
-        for (int i = 0; i < 11; ++i)
-        {
+    test("Degree1") = [mul, add]() {
+        auto degree1poly = [](auto c, auto t) {
+            return c[0] * (1 - t) + c[1] * t;
+        };
+        for (int i = 0; i < 11; ++i) {
             double t = i * 0.1;
             std::array<double, 2> c{42.0, 43.0};
             std::array<double, 3> result{};
@@ -61,12 +106,11 @@ auto main() -> int
         }
     };
 
-    test("Degree2") = [mul, add]()
-    {
-        auto degree2poly = [](auto omt, auto c, auto t)
-        { return c[0] * omt * omt + 2.0 * c[1] * t * omt + c[2] * t * t; };
-        for (int i = 0; i < 11; ++i)
-        {
+    test("Degree2") = [mul, add]() {
+        auto degree2poly = [](auto omt, auto c, auto t) {
+            return c[0] * omt * omt + 2.0 * c[1] * t * omt + c[2] * t * t;
+        };
+        for (int i = 0; i < 11; ++i) {
             double t = i * 0.1;
             auto const omt = 1.0 - t;
             std::array<double, 3> c{0.0, 2.0, 4.0};
@@ -83,15 +127,12 @@ auto main() -> int
         }
     };
 
-    test("Degree3") = [mul, add]()
-    {
-        auto degree3poly = [](auto omt, auto c, auto t)
-        {
+    test("Degree3") = [mul, add]() {
+        auto degree3poly = [](auto omt, auto c, auto t) {
             return c[0] * omt * omt * omt + 3.0 * c[1] * t * omt * omt +
                    3.0 * c[2] * omt * t * t + c[3] * t * t * t;
         };
-        for (int i = 0; i < 11; ++i)
-        {
+        for (int i = 0; i < 11; ++i) {
             double t = i * 0.1;
             auto const omt = 1.0 - t;
             std::array<double, 4> c{0.0, 2.0, 4.0, 6.0};
@@ -110,17 +151,14 @@ auto main() -> int
         }
     };
 
-    test("Degree4") = [mul, add]()
-    {
-        auto degree4poly = [](auto omt, auto c, auto t)
-        {
+    test("Degree4") = [mul, add]() {
+        auto degree4poly = [](auto omt, auto c, auto t) {
             return c[0] * omt * omt * omt * omt +
                    4.0 * c[1] * t * omt * omt * omt +
                    6.0 * c[2] * omt * omt * t * t +
                    4.0 * c[3] * omt * t * t * t + c[4] * t * t * t * t;
         };
-        for (int i = 0; i < 11; ++i)
-        {
+        for (int i = 0; i < 11; ++i) {
             double t = i * 0.1;
             auto const omt = 1.0 - t;
             std::array<double, 5> c{0.0, 2.0, 4.0, 6.0, 8.0};

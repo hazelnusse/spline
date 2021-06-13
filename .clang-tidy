@@ -8,6 +8,9 @@ Checks: >-
     # fix this later,
     -altera-id-dependent-backward-branch,
 
+    # don't warn about type trait alignment,
+    -altera-struct-pack-align,
+
     # allow default args,
     -fuchsia-default-arguments-*,
 
@@ -22,6 +25,9 @@ Checks: >-
 
     # allow pragma once,
     -llvm-header-guard,
+
+    # clang-format sorts headers,
+    -llvm-include-order,
 
     # abseil not used,
     -abseil-*,
