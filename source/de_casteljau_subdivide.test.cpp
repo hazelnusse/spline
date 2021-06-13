@@ -2,7 +2,7 @@
 #include <spline/de_casteljau_subdivide.hpp>
 #include <ut.hpp>
 
-int main()
+auto main() -> int
 {
     using namespace boost::ut::literals;
     using namespace boost::ut;
@@ -17,7 +17,8 @@ int main()
 
     test("EmptyOrReversed") = [mul, add]()
     {
-        std::array<double, 0> c, result;
+        std::array<double, 0> c{};
+        std::array<double, 0> result{};
         auto it1 = de_casteljau_subdivide(c.cbegin(), c.cend(), result.begin(),
                                           0.0, mul, add);
         expect(it1 == result.cbegin());
@@ -31,7 +32,8 @@ int main()
     test("Degree0") = [mul, add]()
     {
         {
-            std::array<double, 1> c{42.0}, result;
+            std::array<double, 1> c{42.0};
+            std::array<double, 1> result{};
             auto it1 = de_casteljau_subdivide(c.cbegin(), c.cend(),
                                               result.begin(), 0.0, mul, add);
             expect(it1 == result.cend());
@@ -48,7 +50,7 @@ int main()
         {
             double t = i * 0.1;
             std::array<double, 2> c{42.0, 43.0};
-            std::array<double, 3> result;
+            std::array<double, 3> result{};
             result.fill(-35.0);
             auto it1 = de_casteljau_subdivide(c.cbegin(), c.cend(),
                                               result.begin(), t, mul, add);
@@ -68,7 +70,7 @@ int main()
             double t = i * 0.1;
             auto const omt = 1.0 - t;
             std::array<double, 3> c{0.0, 2.0, 4.0};
-            std::array<double, 5> result;
+            std::array<double, 5> result{};
             result.fill(-35.0);
             auto it1 = de_casteljau_subdivide(c.cbegin(), c.cend(),
                                               result.begin(), t, mul, add);
@@ -93,7 +95,7 @@ int main()
             double t = i * 0.1;
             auto const omt = 1.0 - t;
             std::array<double, 4> c{0.0, 2.0, 4.0, 6.0};
-            std::array<double, 7> result;
+            std::array<double, 7> result{};
             result.fill(-35.0);
             auto it1 = de_casteljau_subdivide(c.cbegin(), c.cend(),
                                               result.begin(), t, mul, add);
@@ -122,7 +124,7 @@ int main()
             double t = i * 0.1;
             auto const omt = 1.0 - t;
             std::array<double, 5> c{0.0, 2.0, 4.0, 6.0, 8.0};
-            std::array<double, 9> result;
+            std::array<double, 9> result{};
             result.fill(-35.0);
             auto it1 = de_casteljau_subdivide(c.cbegin(), c.cend(),
                                               result.begin(), t, mul, add);

@@ -1,0 +1,7 @@
+---
+Checks: >-
+    -google-build-using-namespace,
+    -readability-magic-numbers,
+
+InheritParentConfig: true
+...

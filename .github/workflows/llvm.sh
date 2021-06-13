@@ -78,4 +78,4 @@ esac
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 add-apt-repository "${REPO_NAME}"
 apt-get update
-apt-get install -y clang-format-$LLVM_VERSION clang++-$LLVM_VERSION
+apt-get install -y clang-format-$LLVM_VERSION clang-tidy-$LLVM_VERSION clang++-$LLVM_VERSION

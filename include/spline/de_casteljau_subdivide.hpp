@@ -26,9 +26,9 @@ namespace spline
 ///      write  2 * std::distance(first, last) - 1 elements.
 template <class InputIt, class OutputIt, class Real, class MultiplicationOp,
           class AdditionOp>
-constexpr OutputIt de_casteljau_subdivide(InputIt first, InputIt last,
+constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
                                           OutputIt d_first, Real t,
-                                          MultiplicationOp mul, AdditionOp add)
+                                          MultiplicationOp mul, AdditionOp add) -> OutputIt
 {
     auto const num_coefficients = last - first;
     if (num_coefficients <= 0)  // Empty or non-sensical input range.
@@ -50,7 +50,7 @@ constexpr OutputIt de_casteljau_subdivide(InputIt first, InputIt last,
         // SPLINE_TRACE_N_1
         return d_first;
     }
-    else if (num_coefficients == 2)
+    if (num_coefficients == 2)
     {
         *d_first++ = *first;
         *d_first++ = lerp(*first, *--last);
