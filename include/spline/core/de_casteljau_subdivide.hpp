@@ -15,10 +15,10 @@ namespace spline::core {
 /// @tparam InputIt Input iterator.
 /// @tparam OutputIt Output iterator.
 /// @tparam Scalar Scalar number type (typically float/double/long double).
-/// @tparam MultiplicationOp binary operator accepting
+/// @tparam Mul binary operator accepting
 ///         InputIt::value_type and Scalar, returning an
 ///         InputIt::value_type.
-/// @tparam AdditionOp binary operator accepting two InputIt::value_type
+/// @tparam Add binary operator accepting two InputIt::value_type
 ///         and returning a InputIt::value_type.
 /// @param[in] first Iterator to first element of input range.
 /// @param[in] last Iterator to one past the last element of the range.
@@ -29,12 +29,10 @@ namespace spline::core {
 /// @return Output iterator to the element past the last element written.
 /// @pre @p d_first must point to a destination range where it is possible
 /// to write  2 * std::distance(first, last) - 1 elements.
-template <class InputIt, class OutputIt, class Scalar, class MultiplicationOp,
-          class AdditionOp>
+template <class InputIt, class OutputIt, class Scalar, class Mul, class Add>
 constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
-                                      OutputIt d_first, Scalar t,
-                                      MultiplicationOp mul, AdditionOp add)
-    -> OutputIt
+                                      OutputIt d_first, Scalar t, Mul mul,
+                                      Add add) -> OutputIt
 {
     // initialize left half of destination range with b0^(0) .. bn^(0), then
     // [b0^(0), b1^(0), ..., bn^(0), X, ..., X, X]
