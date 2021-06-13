@@ -21,7 +21,7 @@ struct fallback {};
 /// of `fallback`. Used to determine if all other function in the overload set
 /// are not candidates.
 template <class T, class U>
-constexpr auto operator*(T&&, U&&) -> fallback;
+constexpr auto operator*(const T&, const U&) -> fallback;
 
 /// @brief Function object for performing multiplication
 /// @tparam Left Left operand

@@ -58,12 +58,13 @@ auto main() -> int
                                   typename T::mul_type>);
         } |
         std::tuple<
-            vs<std::complex<float>>, vs<std::complex<double>>,
+            vs<int, int>, vs<double, double>, vs<std::complex<float>>,
+            vs<std::complex<double>>,
             vs<std::array<double, 2>, double, decltype(add), decltype(mul)>,
             vs<std::tuple<double, double>, double, decltype(add),
                decltype(mul)>,
-            vs<std::pair<double, double>, double, decltype(add), decltype(mul)>,
-            vs<double, double>, vs<int, int>>{};
+            vs<std::pair<double, double>, double, decltype(add),
+               decltype(mul)>>{};
 
     test("is_not_vector_space") =
         []<class T>() {
