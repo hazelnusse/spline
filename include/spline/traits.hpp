@@ -26,6 +26,10 @@ template <class T>
 using iter_value_t =
     typename std::iterator_traits<remove_cvref_t<T>>::value_type;
 
+template <class T>
+using iter_category_t =
+    typename std::iterator_traits<remove_cvref_t<T>>::iterator_category;
+
 /// @brief Returns a boolean with dependent scope
 /// @see https://wg21.link/p1830
 template <bool Value, class... Args>
