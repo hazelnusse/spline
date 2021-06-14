@@ -44,8 +44,6 @@ namespace spline::core {
 ///
 /// To obtain the first and last coefficients of reduced polynomials, see
 /// de_casteljau_subdivide().
-///
-/// @see spline::de_casteljau
 template <class InputIt, class Scalar, class Mul, class Add>
 constexpr auto de_casteljau(InputIt first, InputIt last, Scalar t, Mul mul,
                             Add add) -> InputIt
