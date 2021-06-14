@@ -13,6 +13,7 @@ else()
 endif()
 
 set(component_files
+    "${CMAKE_CURRENT_LIST_DIR}/../source/concepts.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/../source/de_casteljau_subdivide.cpp"
 )
 
