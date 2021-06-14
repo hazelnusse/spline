@@ -12,23 +12,38 @@
 namespace spline::core {
 
 /// @brief De Casteljau's algorithm with subdivision
-/// @tparam InputIt Input iterator.
-/// @tparam OutputIt Output iterator.
-/// @tparam Scalar Scalar number type (typically float/double/long double).
-/// @tparam Mul binary operator accepting
-///         InputIt::value_type and Scalar, returning an
-///         InputIt::value_type.
-/// @tparam Add binary operator accepting two InputIt::value_type
-///         and returning a InputIt::value_type.
-/// @param[in] first Iterator to first element of input range.
-/// @param[in] last Iterator to one past the last element of the range.
-/// @param[in] t Point at which to compute the polynomial value.
-/// @param[in] mul Vector-Scalar multiplication function object.
-/// @param[in] add Vector-Vector addition function object.
-/// @param[out] d_first Beginning of destination range.
+/// @tparam InputIt Input iterator. Must meet the requirements of
+///         *LegacyInputIterator*. Defines (exposition-only) `Vector` as
+///         `xtd::iter_value_t<InputIt>`.
+/// @tparam OutputIt Output iterator. Must meet the requirements of
+///         *LegacyBidirectionalIterator*. `xtd::iter_value_t<OutputIt>` must be
+///         the same as `xtd::iter_value_t<InputIt>`.
+/// @tparam Scalar Scalar type (typically `float`/`double`/`long double`). Must
+///         be constructible with `Scalar{1}` and closed under subtraction.
+/// @tparam Mul Binary operator accepting `Scalar` and `Vector`, returning a
+///         `Vector`.
+/// @tparam Add Binary operator accepting two `Vector` objects and returning a
+///         `Vector`.
+/// @param first Iterator to first element of input range.
+/// @param last Iterator to one past the last element of the range.
+/// @param d_first Beginning of destination range.
+/// @param t Point at which to compute the polynomial value.
+/// @param mul `Scalar`-`Vector` multiplication function object.
+/// @param add `Vector`-`Vector` addition function object.
 /// @return Output iterator to the element past the last element written.
-/// @pre @p d_first must point to a destination range where it is possible
-/// to write  2 * std::distance(first, last) - 1 elements.
+/// @pre `first` and `last` must form a valid range.
+/// @pre `t` is in the closed interval **[0, 1]**.
+/// @pre `d_first` must point to a destination range where it is possible to
+///      write `2 * distance(first, last) - 1` elements.
+///
+/// Evaluates a polynomial, in Bernstein form, at independent variable `t` using
+/// De Casteljau's algorithm. **[first, last)** describe a range specifying
+/// the Bernstein coefficients, where the polynomial degree **n =**
+/// `distance(first, last) - 1`. Writes the coefficients from reduced
+/// polynomials **[B0^(0), B0^(1), ..., B0^(n), ... Bn-1^(1), Bn^(0)]** in the
+/// destination range `[d_first, next(2 * d_first - 1)]`.
+///
+/// To evaluate the polynomial in-place, see spline::de_casteljau.
 template <class InputIt, class OutputIt, class Scalar, class Mul, class Add>
 constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
                                       OutputIt d_first, Scalar t, Mul mul,

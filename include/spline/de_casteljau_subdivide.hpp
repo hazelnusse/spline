@@ -13,30 +13,24 @@
 /// @namespace spline
 /// @brief The Spline library
 namespace spline {
-
 namespace detail {
 
+/// @brief Function object providing a constrained form of
+/// spline::core::de_casteljau_subdivide
 struct de_casteljau_subdivide_fn final {
-    /// @brief De Casteljau's algorithm with subdivision
-    /// @tparam InputIt Input iterator. Must meet the requirements of
-    ///         LegacyInputIterator.
-    /// @tparam OutputIt Output iterator. Must meet the requirements of
-    ///         LegacyBidirectionalIterator.
-    /// @tparam Scalar Scalar number type (typically float/double/long double).
-    /// @tparam Mul binary operator accepting
-    ///         Scalar and InputIt::value_type, returning an
-    ///         InputIt::value_type.
-    /// @tparam Add binary operator accepting two InputIt::value_type
-    ///         and returning a InputIt::value_type.
-    /// @param first Iterator to first element of input range.
-    /// @param last Iterator to one past the last element of the range.
-    /// @param t Point at which to compute the polynomial value.
-    /// @param mul Scalar-Vector multiplication function object.
-    /// @param add Vector-Vector addition function object.
-    /// @param d_first Beginning of destination range.
-    /// @return Output iterator to the element past the last element written.
-    /// @pre @p d_first must point to a destination range where it is possible
-    /// to write  2 * std::distance(first, last) - 1 elements.
+    /// @copydoc spline::core::de_casteljau_subdivide
+    /// @note Requires:
+    ///   - `std::is_base_of_v<std::input_iterator_tag,
+    ///   xtd::iter_category_t<InputIt>>` is `true` and
+    ///   - `std::is_base_of_v<std::bidirectional_iterator_tag,
+    ///   xtd::iter_category_t<OutputIt>>` is `true` and
+    ///   - `std::is_same_v<xtd::iter_value_t<InputIt>,
+    ///   xtd::iter_value_t<OutputIt>>` is `true` and
+    ///   - `concepts::is_vector_space_v<xtd::iter_category_t<InputIt>, Scalar,
+    ///   Add, Mul>` is `true`
+    ///
+    /// For an unconstrained version of this algorithm, see
+    /// spline::core::de_casteljau_subdivide.
     template <class InputIt, class OutputIt, class Scalar,
               class Mul = multiplies<Scalar, xtd::iter_value_t<InputIt>>,
               class Add = std::plus<>>
@@ -61,7 +55,17 @@ struct de_casteljau_subdivide_fn final {
 };
 }  // namespace detail
 
-/// @brief Global function object performing De Casteljau's algorithm with
-///     subdivision
+/// @copybrief core::de_casteljau_subdivide
+/// @copydetails detail::de_casteljau_subdivide_fn::operator()()
+/// @note This is implemented as global function object.
+#ifdef DOXYGEN
+template <class InputIt, class OutputIt, class Scalar,
+          class Mul = multiplies<Scalar, xtd::iter_value_t<InputIt>>,
+          class Add = std::plus<>>
+constexpr auto de_casteljau_subdivide(InputIt first, InputIt last,
+                                      OutputIt d_first, Scalar t, Mul mul = {},
+                                      Add add = {}) -> OutputIt;
+#else
 inline constexpr detail::de_casteljau_subdivide_fn de_casteljau_subdivide{};
+#endif
 }  // namespace spline

@@ -18,7 +18,7 @@ namespace spline::core {
 /// @tparam Mul Binary operator accepting `Scalar` and `Vector`, returning a
 ///         `Vector`.
 /// @tparam Add Binary operator accepting two `Vector` objects and returning a
-/// `Vector`.
+///         `Vector`.
 /// @param first Iterator to first element of input range.
 /// @param last Iterator to one past the last element of the range.
 /// @param t Point at which to compute the polynomial value.
@@ -32,8 +32,8 @@ namespace spline::core {
 /// De Casteljau's algorithm. **[first, last)** describe a range specifying
 /// the Bernstein coefficients, where the polynomial degree **n =**
 /// `distance(first, last) - 1`. Writes the coefficients from reduced
-/// polynomials **[B0^(0), B0^(1), ... B0^(n)]** in the provided input range and
-/// returns an iterator to **B0^(n)**.
+/// polynomials **[B0^(0), B0^(1), ..., B0^(n)]** in the provided input range
+/// and returns an iterator to **B0^(n)**.
 ///
 /// The last coefficient of the reduced polynomials can be obtained by
 /// supplying reverse iterators and `1 - t`:
@@ -43,7 +43,7 @@ namespace spline::core {
 /// ```
 ///
 /// To obtain the first and last coefficients of reduced polynomials, see
-/// de_casteljau_subdivide().
+/// spline::de_casteljau_subdivide.
 template <class InputIt, class Scalar, class Mul, class Add>
 constexpr auto de_casteljau(InputIt first, InputIt last, Scalar t, Mul mul,
                             Add add) -> InputIt

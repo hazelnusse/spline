@@ -13,16 +13,16 @@
 namespace spline {
 namespace detail {
 
-/// @brief Function object providing a constrained form of core::de_casteljau()
+/// @brief Function object providing a constrained form of spline::core::de_casteljau
 struct de_casteljau_fn final {
-    /// @copydoc core::de_casteljau
+    /// @copydoc spline::core::de_casteljau
     /// @note Requires:
     ///   - `std::is_base_of_v<std::bidirectional_iterator_tag,
     ///   xtd::iter_category_t<InputIt>>` is `true` and
     ///   - `concepts::is_vector_space_v<xtd::iter_category_t<InputIt>, Scalar,
     ///   Add, Mul>` is `true`
     ///
-    /// For an unconstrained version of this algorithm, see core::de_casteljau.
+    /// For an unconstrained version of this algorithm, see spline::core::de_casteljau.
     template <class InputIt, class Scalar,
               class Mul = multiplies<Scalar, xtd::iter_value_t<InputIt>>,
               class Add = std::plus<>>
