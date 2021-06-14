@@ -26,6 +26,7 @@ template <class T>
 using iter_value_t =
     typename std::iterator_traits<remove_cvref_t<T>>::value_type;
 
+/// @brief Computes the associated iterator category type of an iterator T
 template <class T>
 using iter_category_t =
     typename std::iterator_traits<remove_cvref_t<T>>::iterator_category;

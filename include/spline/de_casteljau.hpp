@@ -11,11 +11,16 @@
 #include "spline/traits.hpp"
 
 namespace spline {
-
 namespace detail {
 
+/// @brief Function object providing a constrained form of core::de_casteljau()
 struct de_casteljau_fn final {
-    /// @brief De Casteljau's algorithm in-place
+    /// @copydoc core::de_casteljau
+    /// @note Requires:
+    ///   - `std::is_base_of_v<std::bidirectional_iterator_tag,
+    ///   xtd::iter_category_t<InputIt>>` is `true` and
+    ///   - `concepts::is_vector_space_v<xtd::iter_category_t<InputIt>, Scalar,
+    ///   Add, Mul>` is `true`
     template <class InputIt, class Scalar,
               class Mul = multiplies<Scalar, xtd::iter_value_t<InputIt>>,
               class Add = std::plus<>>
@@ -36,5 +41,6 @@ struct de_casteljau_fn final {
 }  // namespace detail
 
 /// @brief Global function object performing De Casteljau's algorithm
+/// @see detail::de_casteljau_fn
 inline constexpr detail::de_casteljau_fn de_casteljau{};
 }  // namespace spline
