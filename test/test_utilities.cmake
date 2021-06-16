@@ -61,7 +61,7 @@ macro(spline_component_test component_source_file)
   # the corresponding header file.
   add_library(${component}_component OBJECT ${component_source_file})
   target_link_libraries(${component}_component PRIVATE spline::spline)
-  target_compile_features(${component}_component PRIVATE cxx_std_20)
+  target_compile_features(${component}_component PRIVATE cxx_std_17)
 
   enable_test_warnings(${test} PRIVATE)
 
